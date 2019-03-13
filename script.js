@@ -9,32 +9,17 @@ function loadData(){
     requiredURL = inputURL.substring(inputURL.indexOf("com")+4);
 
     if(requiredURL.indexOf('/') > 0){
+
+          startTime = new Date();
           result_array = [0,0,0,0];
           username = requiredURL.substring(0,requiredURL.indexOf("/"));
           repo = requiredURL.substring(requiredURL.indexOf("/")+1).replace("/","");
 
-          console.log('Username : '+username);
-          console.log('Repo : '+repo);
-
           token = "Token bb8b99316e71fd378266527fe39d822d5c5abd94"
+
           page = 1;
+          performAJAXCall(username,repo,token,page,result_array);
 
-          while(true){
-
-            result = performAJAXCall(username,repo,token,page);
-
-            if(result.length == 0){
-              console.log("Breaking Here : "+page);
-              break;
-            }
-
-            parseData(result,result_array);
-            page = page+1;
-
-          }
-
-          displayData(result_array);
-          $("#spinner").toggle();
     }
     else{
         window.alert('Invalid URL Format');
@@ -57,7 +42,6 @@ function parseData(result,result_array){
   - [3] Number of open issues that were opened more than 7 days ago
   */
 
-  console.log(result);
   current_timestamp = new Date();
 
   result_array[0] += result.length;
@@ -65,14 +49,10 @@ function parseData(result,result_array){
   for(i = 0 ; i < result.length ; i++) {
 
       timestamp = result[i].created_at;
-      console.log(timestamp);
       issue_timestamp = new Date(timestamp);
-      console.log(issue_timestamp);
 
       difference = current_timestamp.getTime() - issue_timestamp.getTime();
       resultInMinutes = Math.round(difference / 60000);
-
-      console.log(resultInMinutes);
 
       if(resultInMinutes <= 1440){
         result_array[1] += 1;
@@ -84,6 +64,8 @@ function parseData(result,result_array){
 
 
   }
+
+  return result_array;
 
 }
 
@@ -105,28 +87,40 @@ function displayData(result){
     content += '<td>'+result[3]+'</td>';
     content += '</tr>';
     content += '</tbody></table>';
-    console.log(content);
 
     document.getElementById("git_data").insertAdjacentHTML("beforeend", content);
 
 }
 
 
-function performAJAXCall(username,repo,token,page){
+function performAJAXCall(username,repo,token,page,result_array){
 
-  response = '';
+
 
   $.ajax({
 
             url: "https://api.github.com/repos/"+username+"/"+repo+"/issues?page="+page+"&per_page=100",
             type: 'GET',
-            async:false,
             headers: {
                 'Authorization': token
             },
             success: function (result) {
-               console.log("AJAX CALL SUCCESS"+result);
-               response = result;
+
+
+               if(result.length == 0){
+
+                   endTime = new Date();
+                   diffMs = endTime - startTime;
+                   minutes = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+
+                   return;
+               }
+
+               result_array = parseData(result,result_array);
+               page = page+1;
+               displayData(result_array);
+               performAJAXCall(username,repo,token,page,result_array);
+
             },
             error: function (error) {
                window.alert('No Such Repo');
@@ -134,6 +128,6 @@ function performAJAXCall(username,repo,token,page){
 
     });
 
-    return response;
+
 
 }
