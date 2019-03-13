@@ -108,6 +108,7 @@ function performAJAXCall(username,repo,token,page,result_array){
 
 
                if(result.length == 0){
+                   displayData(result_array);
                    return;
                }
 
