@@ -2,6 +2,7 @@
 
 function loadData(){
 
+
   inputURL = $("#giturl").val();
 
   if(inputURL.startsWith("https://github.com")){
@@ -10,15 +11,15 @@ function loadData(){
 
     if(requiredURL.indexOf('/') > 0){
 
-          startTime = new Date();
           result_array = [0,0,0,0];
           username = requiredURL.substring(0,requiredURL.indexOf("/"));
           repo = requiredURL.substring(requiredURL.indexOf("/")+1).replace("/","");
 
-          token = "Token bb8b99316e71fd378266527fe39d822d5c5abd94"
+          token = "Token 1122"
 
           page = 1;
           performAJAXCall(username,repo,token,page,result_array);
+
 
     }
     else{
