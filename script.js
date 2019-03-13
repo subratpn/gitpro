@@ -108,11 +108,6 @@ function performAJAXCall(username,repo,token,page,result_array){
 
 
                if(result.length == 0){
-
-                   endTime = new Date();
-                   diffMs = endTime - startTime;
-                   minutes = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-
                    return;
                }
 
