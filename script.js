@@ -1,5 +1,3 @@
-
-
 function loadData(){
 
 
@@ -11,6 +9,7 @@ function loadData(){
 
     if(requiredURL.indexOf('/') > 0){
 
+
           result_array = [0,0,0,0];
           username = requiredURL.substring(0,requiredURL.indexOf("/"));
           repo = requiredURL.substring(requiredURL.indexOf("/")+1).replace("/","");
@@ -18,7 +17,8 @@ function loadData(){
           token = "Token 1122"
 
           page = 1;
-          performAJAXCall(username,repo,token,page,result_array);
+
+          performAJAXCall(username,repo,token,page);
 
 
     }
@@ -94,37 +94,75 @@ function displayData(result){
 }
 
 
-function performAJAXCall(username,repo,token,page,result_array){
+function performAJAXCall(username,repo,token,page){
 
-
+  total_issue = 0;
 
   $.ajax({
 
-            url: "https://api.github.com/repos/"+username+"/"+repo+"/issues?page="+page+"&per_page=100",
+            url: "https://api.github.com/users/"+username+"/repos",
             type: 'GET',
             headers: {
                 'Authorization': token
             },
             success: function (result) {
 
+                      for(i = 0 ; i < result.length ; i++){
+                          if(result[i].name === repo){
+                              console.log(result[i].name);
+                              total_issue = result[i].open_issues;
+                              break;
+                          }
+                      }
 
-               if(result.length == 0){
-                   displayData(result_array);
-                   return;
-               }
-
-               result_array = parseData(result,result_array);
-               page = page+1;
-               displayData(result_array);
-               performAJAXCall(username,repo,token,page,result_array);
 
             },
             error: function (error) {
-               window.alert('No Such Repo');
+
             }
+
+    }).done(function() {
+
+            getGitData(username,repo,token,page,result_array,total_issue)
 
     });
 
 
+
+}
+
+
+
+function getGitData(username,repo,token,page,result_array,total_issue){
+
+          total_issue = Math.ceil(total_issue / 100);
+          console.log(total_issue);
+
+          for(i=0;i<total_issue;i++){
+
+                      $.ajax({
+
+                                        url: "https://api.github.com/repos/"+username+"/"+repo+"/issues?page="+page+"&per_page=100",
+                                        type: 'GET',
+                                        headers: {
+                                            'Authorization': token
+                                        },
+                                        success: function (result) {
+                                           result_array = parseData(result,result_array);
+                                        },
+                                        error: function (error) {
+                                           window.alert('No Such Repo');
+                                        }
+
+
+                      }).done(function() {
+
+                              displayData(result_array);
+
+                      });
+
+                      page = page + 1;
+
+          }
 
 }
