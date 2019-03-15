@@ -45,15 +45,25 @@ function parseData(result,result_array){
 
   current_timestamp = new Date();
 
-  result_array[0] += result.length;
+
 
   for(i = 0 ; i < result.length ; i++) {
+
+      pull_flag = 'pull_request' in result[i];
+
+      if(pull_flag === true){
+        console.log(pull_flag);
+        continue;
+      }
+
 
       timestamp = result[i].created_at;
       issue_timestamp = new Date(timestamp);
 
       difference = current_timestamp.getTime() - issue_timestamp.getTime();
       resultInMinutes = Math.round(difference / 60000);
+
+      result_array[0] += 1;
 
       if(resultInMinutes <= 1440){
         result_array[1] += 1;
